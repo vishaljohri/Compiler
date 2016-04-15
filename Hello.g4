@@ -4,7 +4,7 @@
  
 grammar Hello;
 
-r 
+vsc 
 	: (statement | function)* 
 	;
 	
@@ -46,18 +46,24 @@ message
 	: ' \" ( )*? \" '
 	;
 
-
-
 loopStatement: 'loop' parExpression '{' (statement)* '}';
 parExpression: '(' expression ')';
 expression
-	: primary 
-	| expression relationalOp expression 
+	: expression relationalOp expression 
 	| expression 'and' expression 
 	| expression 'or' expression
-	| expression arithmeticOp expression
+	| term ( addOp term)*
 	;
 	
+term
+	: factor ( mulOp factor)*;
+
+factor
+	: digit
+	| IDENTIFIER
+	| '(' expression ')'
+	;
+
 relationalOp
 	: '<'
 	| '<='
@@ -67,13 +73,16 @@ relationalOp
 	| '!='
 	;
 
-arithmeticOp
+addOp
 	: '+'
 	| '-'
-	| '*'
-	| '/'
 	;
 	
+mulOp
+	: '*'
+	| '/'
+	;
+
 primary
 	: '(' expression ')' 
 	| IDENTIFIER
@@ -116,11 +125,11 @@ type
 IDENTIFIER 
 	: [a-z|A-Z|_][a-z|A-Z|0-9|_]* 
 	;
-
+	
 WS 
 	: [ \t\r\n]+ -> skip 
 	;
-
+	
 /*
 r  : 'hello' IDENTIFIER 'stop';         // match keyword hello followed by an IDENTIFIERentifier
 
