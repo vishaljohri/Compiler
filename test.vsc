@@ -1,0 +1,8 @@
+number a1 = 4
+number test2 ( number b1 , number b2 )
+{
+number a = 5
+condition ( true )
+{
+}
+}
