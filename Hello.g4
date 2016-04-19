@@ -59,7 +59,7 @@ term
 	: factor ( mulOp factor)*;
 
 factor
-	: digit
+	: DIGIT
 	| IDENTIFIER
 	| '(' expression ')'
 	;
@@ -90,20 +90,11 @@ primary
 	;
 	
 integerLiteral
-	: (digit)+
+	: (DIGIT)+
 	;
 	
-digit 
-	: '0' 
-	| '1' 
-	| '2' 
-	| '3' 
-	| '4' 
-	| '5' 
-	| '6' 
-	| '7' 
-	| '8' 
-	| '9'
+DIGIT 
+	: [0-9]
 	;
 
 conditionalStatement
