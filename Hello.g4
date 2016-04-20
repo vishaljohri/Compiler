@@ -46,17 +46,25 @@ message
 	: ' \" ( )*? \" '
 	;
 
-loopStatement: 'loop' parExpression '{' (statement)* '}';
-parExpression: '(' expression ')';
+loopStatement
+	: 'loop' parExpression '{' (statement)* '}'
+	;
+	
+parExpression
+	: '(' expression ')'
+	;
+	
 expression
 	: expression relationalOp expression 
 	| expression 'and' expression 
 	| expression 'or' expression
-	| term ( addOp term)*
+	| term addOp expression
+	| term
 	;
 	
 term
-	: factor ( mulOp factor)*;
+	: factor mulOp term
+	| factor;
 
 factor
 	: DIGIT
