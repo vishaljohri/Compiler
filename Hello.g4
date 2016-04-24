@@ -45,6 +45,7 @@ funcCall
 print
 	: 'display' IDENTIFIER 
 	| 'display' message
+	| 'display' DIGIT
 	;
 	
 message
