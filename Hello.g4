@@ -112,7 +112,7 @@ DIGIT
 	;
 
 conditionalStatement
-	: 'condition' parExpression '{' (statement)* '}' ('else-condition' parExpression '{' (statement)* '}')? ('else' '{' (statement)* '}')?
+	: 'condition' parExpression '{' (statement)* '}' ('else-condition' parExpression '{' (statement)* '}')* ('else' '{' (statement)* '}')?
 	;
 
 varaiableInitialization
