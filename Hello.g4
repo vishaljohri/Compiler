@@ -9,7 +9,7 @@ vsc
 	;
 	
 function 
-	: type? IDENTIFIER params body
+	: 'def' IDENTIFIER params body
 	;
 	
 params 
@@ -35,7 +35,12 @@ statement
 	| loopStatement
 	| expression
 	| print
+	| funcCall
 	;
+	
+funcCall
+	: IDENTIFIER params;
+
 	
 print
 	: 'display' IDENTIFIER 
