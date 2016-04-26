@@ -25,7 +25,15 @@ formalParameter
 	;
 	
 body 
-	: '{' statement* '}'
+	: functionStart statement* functionEnd
+	;
+
+functionStart
+	: '{'
+	;
+
+functionEnd
+	: '}'
 	;
 	
 statement
@@ -55,7 +63,7 @@ message
 	;
 
 loopStatement
-	: 'loop' parExpression '{' (statement)* '}'
+	: 'loop' parExpression loopStart (statement)* loopend
 	;
 	
 parExpression
@@ -114,7 +122,23 @@ DIGIT
 	;
 
 conditionalStatement
-	: 'condition' parExpression '{' (statement)* '}' ('else-condition' parExpression '{' (statement)* '}')* ('else' '{' (statement)* '}')?
+	: 'condition' parExpression conditionalStart (statement)* conditionalEnd ('else-condition' parExpression conditionalStart  (statement)* conditionalEnd)* ('else' conditionalStart (statement)* conditionalEnd)?
+	;
+	
+conditionalStart
+	:  '{'
+	;
+
+loopStart
+	:  '{'
+	;
+	
+loopend
+	:  '}'
+	;
+
+conditionalEnd
+	: '}'
 	;
 
 varaiableInitialization
