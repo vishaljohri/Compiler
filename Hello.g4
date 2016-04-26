@@ -36,6 +36,8 @@ statement
 	| expression
 	| print
 	| funcCall
+	|'return'
+	|'return' IDENTIFIER 
 	;
 	
 funcCall
