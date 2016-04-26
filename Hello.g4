@@ -5,7 +5,7 @@
 grammar Hello;
 
 vsc 
-	: (statement | function)* 
+	: 'START PROG' (statement | function)* 'END PROG'
 	;
 	
 function 
@@ -21,7 +21,7 @@ paramList
 	;
 
 formalParameter
-	: type IDENTIFIER
+	: IDENTIFIER
 	;
 	
 body 
@@ -29,8 +29,8 @@ body
 	;
 	
 statement
-	: variableDeclaration 
-	| varaiableInitialization 
+	
+	: varaiableInitialization 
 	| conditionalStatement 
 	| loopStatement
 	| expression
@@ -116,15 +116,7 @@ conditionalStatement
 	;
 
 varaiableInitialization
-	: type IDENTIFIER '=' expression | IDENTIFIER '=' expression
-	;
-
-variableDeclaration
-	: type IDENTIFIER
-	;
-	
-type
-	: 'number'
+	: IDENTIFIER '=' expression | IDENTIFIER '=' expression
 	;
 
 IDENTIFIER 
@@ -143,4 +135,3 @@ IDENTIFIER : [a-z]+ ;             // match lower-case IDENTIFIERentifiers
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
 */
-
