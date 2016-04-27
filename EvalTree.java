@@ -1,3 +1,5 @@
+
+
 public class EvalTree extends HelloBaseVisitor<Integer>{			
 
 	int ifid = 0;
@@ -28,6 +30,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 
 	@Override
 	public Integer visitFunctionStart(HelloParser.FunctionStartContext ctx) {
+		System.out.println("PARAMOVER");
 		// TODO Auto-generated method stub
 		return super.visitFunctionStart(ctx);
 	}
@@ -35,6 +38,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	@Override
 	public Integer visitFunctionEnd(HelloParser.FunctionEndContext ctx) {
 		// TODO Auto-generated method stub
+		System.out.println("END "+ctx.getParent().getParent().getChild(1).getText());
 		return super.visitFunctionEnd(ctx);
 	}
 
@@ -132,7 +136,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 //			System.out.println(ctx.getChild(2).getText());
 			if(ctx.getChild(2).getText().contains("pop") || ctx.getChild(2).getText().contains("peek")){
 				
-			}else{
+			}else if(ctx.getChild(2).getText().contains("+") || ctx.getChild(2).getText().contains("-")){
 				System.out.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
 				System.out.println("PUSH "+ctx.getChild(2).getChild(2).getChild(0).getChild(0).getText());
 			
@@ -245,6 +249,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	@Override
 	public Integer visitFunction(HelloParser.FunctionContext ctx) {
 		// TODO Auto-generated method stub
+		System.out.println("START FUNC "+ctx.getChild(1).getText());
 		return super.visitFunction(ctx);
 	}
 
@@ -278,6 +283,11 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	@Override
 	public Integer visitFuncCall(HelloParser.FuncCallContext ctx) {
 		// TODO Auto-generated method stub
+		
+		if(ctx.getChild(1).getChildCount() == 2){
+			System.out.println("CALL "+ctx.getChild(0).getText());
+		}
+		
 		return super.visitFuncCall(ctx);
 	}
 
@@ -286,10 +296,23 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		// TODO Auto-generated method stub
 		return super.visitFactor(ctx);
 	}
+	
+	@Override
+	public Integer visitFormalParameterCall(HelloParser.FormalParameterCallContext ctx) {
+		String params = "";
+		for(int i=0;i<ctx.getChildCount();i++){
+			params += ctx.getChild(i).getText() + " ";
+		}
+		System.out.println("CALL "+ctx.getParent().getParent().getParent().getChild(0).getText()+" "+params);
+		return super.visitFormalParameterCall(ctx);
+	}
 
 	@Override
 	public Integer visitFormalParameter(HelloParser.FormalParameterContext ctx) {
 		// TODO Auto-generated method stub
+		for(int i=0;i<ctx.getChildCount();i++){
+				System.out.println("STORE "+ctx.getChild(i).getText());
+			}
 		return super.visitFormalParameter(ctx);
 	}
 
@@ -342,6 +365,13 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		}
 		
 		return super.visitParExpression(ctx);
+	}
+
+	@Override
+	public Integer visitRetValue(HelloParser.RetValueContext ctx) {
+		// TODO Auto-generated method stub
+		System.out.println("RET "+ctx.getChild(0).getText());
+		return super.visitRetValue(ctx);
 	}
 
 	@Override
