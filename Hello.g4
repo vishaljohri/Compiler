@@ -213,7 +213,7 @@ varaiableInitialization
 
 
 IDENTIFIER 
-	: [a-z|A-Z|_][a-z|A-Z|0-9|_]* 
+	: 'glob:'?[a-z|A-Z|_][a-z|A-Z|0-9|_]* 
 	;
 	
 WS 
