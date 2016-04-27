@@ -5,7 +5,15 @@
 grammar Hello;
 
 vsc 
-	: 'START PROG' (statement | function)* 'END PROG'
+	: start_prog (statement | function)* end_prog
+	;
+	
+start_prog
+	: 'START PROG'
+	;
+	
+end_prog
+	: 'END PROG'
 	;
 	
 function 
@@ -43,15 +51,30 @@ statement
 	| loopStatement
 	| expression
 	| print
+	| input
 	| funcCall
 	|'return'
 	|'return' IDENTIFIER 
+	| stackOperation
 	;
 	
+stackOperation
+	: IDENTIFIER '.' 'push' '('integerLiteral')'
+	| IDENTIFIER '.' 'push' '('IDENTIFIER')'
+	| stackReturnOp
+	;
+	
+stackReturnOp
+	: IDENTIFIER '.' 'pop' '(' ')'
+	| IDENTIFIER '.' 'peek' '(' ')'
+	;
+
+input
+	: 'ask' IDENTIFIER;
+
 funcCall
 	: IDENTIFIER params;
 
-	
 print
 	: 'display' IDENTIFIER 
 	| 'display' message
@@ -59,11 +82,11 @@ print
 	;
 	
 message
-	: ' \" ( )*? \" '
+	: '\".*\"'
 	;
 
 loopStatement
-	: 'loop' parExpression loopStart (statement)* loopend
+	: loop parExpression loopStart (statement)* loopend
 	;
 	
 parExpression
@@ -122,13 +145,26 @@ DIGIT
 	;
 
 conditionalStatement
-	: 'condition' parExpression conditionalStart (statement)* conditionalEnd ('else-condition' parExpression conditionalStart  (statement)* conditionalEnd)* ('else' conditionalStart (statement)* conditionalEnd)?
+	: condition parExpression conditionalStart (statement)* conditionalEnd (conditionElse parExpression conditionalStart  (statement)* conditionalEnd)* (els '{' (statement)* conditionalEnd)?
 	;
+
+els
+	: 'else'
+	;
+condition
+	: 'condition'
+	;
+
+conditionElse
+	: 'else-condition'
+	;	
 	
 conditionalStart
 	:  '{'
 	;
-
+loop
+	: 'loop'
+	;
 loopStart
 	:  '{'
 	;
@@ -142,7 +178,7 @@ conditionalEnd
 	;
 
 varaiableInitialization
-	: IDENTIFIER '=' expression | IDENTIFIER '=' expression
+	: IDENTIFIER '=' expression | IDENTIFIER '=' stackReturnOp
 	;
 
 IDENTIFIER 
