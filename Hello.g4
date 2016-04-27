@@ -21,8 +21,19 @@ function
 	;
 
 funcCall
-	: IDENTIFIER params
+	: IDENTIFIER paramsCall
 	;
+	
+paramsCall
+	: startbracket paramListCall? endbracket;
+	
+paramListCall
+	: formalParameterCall (',' formalParameterCall)*
+	;
+	
+formalParameterCall
+	: IDENTIFIER
+	| DIGIT;
 	
 startbracket
 	: '('
@@ -57,21 +68,21 @@ functionEnd
 	;
 	
 statement
-	
 	: varaiableInitialization 
+	| funcCall
 	| conditionalStatement 
 	| loopStatement
 	| expression
 	| print
 	| input
-	| funcCall
 	| 'return' retValue?
 	| stackOperation
 	;
 	
 retValue
 	: IDENTIFIER 
-	| integerLiteral;
+	| integerLiteral
+	;
 
 	
 stackOperation
@@ -86,18 +97,17 @@ stackReturnOp
 	;
 
 input
-	: 'ask' IDENTIFIER;
-
-
+	: 'ask' IDENTIFIER
+	;
 
 print
-	: 'display' IDENTIFIER 
-	| 'display' message
+	: 'display' message
+	| 'display' IDENTIFIER 
 	| 'display' DIGIT
 	;
 	
 message
-	: '\".*\"'
+	: '\"' (.)*? '\"'
 	;
 
 loopStatement
@@ -166,6 +176,7 @@ conditionalStatement
 els
 	: 'else'
 	;
+	
 condition
 	: 'condition'
 	;
@@ -177,9 +188,11 @@ conditionElse
 conditionalStart
 	:  '{'
 	;
+	
 loop
 	: 'loop'
 	;
+	
 loopStart
 	:  '{'
 	;
@@ -193,9 +206,9 @@ conditionalEnd
 	;
 
 varaiableInitialization
-	: IDENTIFIER '=' expression 
+	: IDENTIFIER '=' funcCall
+	| IDENTIFIER '=' expression 
 	| IDENTIFIER '=' stackReturnOp 
-	| IDENTIFIER '=' funcCall
 	;
 
 
