@@ -19,9 +19,21 @@ end_prog
 function 
 	: 'def' IDENTIFIER params body
 	;
+
+funcCall
+	: IDENTIFIER params
+	;
+	
+startbracket
+	: '('
+	;
+
+endbracket
+	: ')'
+	;
 	
 params 
-	: '(' paramList? ')'
+	: startbracket paramList? endbracket
 	;
 	
 paramList
@@ -53,10 +65,14 @@ statement
 	| print
 	| input
 	| funcCall
-	|'return'
-	|'return' IDENTIFIER 
+	| 'return' retValue?
 	| stackOperation
 	;
+	
+retValue
+	: IDENTIFIER 
+	| integerLiteral;
+
 	
 stackOperation
 	: IDENTIFIER '.' 'push' '('integerLiteral')'
@@ -72,8 +88,7 @@ stackReturnOp
 input
 	: 'ask' IDENTIFIER;
 
-funcCall
-	: IDENTIFIER params;
+
 
 print
 	: 'display' IDENTIFIER 
@@ -178,8 +193,11 @@ conditionalEnd
 	;
 
 varaiableInitialization
-	: IDENTIFIER '=' expression | IDENTIFIER '=' stackReturnOp
+	: IDENTIFIER '=' expression 
+	| IDENTIFIER '=' stackReturnOp 
+	| IDENTIFIER '=' funcCall
 	;
+
 
 IDENTIFIER 
 	: [a-z|A-Z|_][a-z|A-Z|0-9|_]* 
@@ -191,9 +209,6 @@ WS
 	
 /*
 r  : 'hello' IDENTIFIER 'stop';         // match keyword hello followed by an IDENTIFIERentifier
-
 IDENTIFIER : [a-z]+ ;             // match lower-case IDENTIFIERentifiers
-
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
-
 */
