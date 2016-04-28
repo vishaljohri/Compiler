@@ -92,6 +92,7 @@ programTest = """START PROG
 PUSH 1
 STORE I
 START FUNC TEST
+PARAMOVER
 PUSH 7
 STORE I
 END TEST
@@ -99,7 +100,8 @@ START FUNC TEST1
 PUSH I
 DISP I
 END TEST1
-PUSH "Test         display"
+CALL TEST1
+PUSH "Test"
 DISP
 END PROG""".split('\n')
 
@@ -109,8 +111,8 @@ STORE I
 PARAMOVER
 PUSH I
 PUSH 1
-GT
-JNER 1
+LT
+JER 1
 PUSH I
 PUSH 1
 SUB
@@ -157,6 +159,207 @@ PUSH J
 DISP
 END PROG""".split('\n')
 
+prog = """START PROG
+PUSH 10
+STORE a
+PUSH 20
+STORE b
+PUSH 30
+STORE c
+PUSH 30
+STORE d
+PUSH 0
+STORE GLOB_COND
+START IF ID1
+PUSH b
+PUSH a
+GT
+STORE GLOB_COND
+JNE END_ID1
+PUSH a
+DISP
+END ID1
+START ELSE-IF ID2
+PUSH a
+PUSH b
+GT
+STORE GLOB_COND
+JNE END_ID2
+PUSH a
+DISP
+END ID2
+END PROG""".split('\n')
+
+progTestingWithInter = """START PROG
+PUSH 5
+STORE i
+START FUNC func1
+PUSH 7
+STORE GLOB i
+CALL func2
+PUSH GLOB i
+DISP
+END func1
+START FUNC func2
+PUSH 8
+STORE GLOB i
+END func2
+CALL func1
+END PROG""".split('\n')
+
+progNewOneRecursionFactorial = """START PROG
+START FUNC HELLO
+STORE i
+PARAMOVER
+PUSH 0
+STORE GLOB_COND
+START IF ID1
+PUSH i
+PUSH 1
+LT
+STORE GLOB_COND
+JNE END_ID1
+RET 1
+END ID1
+PUSH i
+PUSH 1
+SUB
+STORE l
+CALL HELLO l
+STORE K
+PUSH i
+PUSH K
+MUL
+STORE a
+RET a
+END HELLO
+CALL HELLO 6
+STORE f
+PUSH f
+DISP
+END PROG""".split('\n')
+
+progStack = """START PROG
+PUSH 5
+STORE STACK i
+PUSH 6
+STORE STACK i
+PUSH 7
+STORE STACK i
+PUSH 8
+STORE STACK i
+POP STACK i
+STORE j
+PUSH j
+DISP
+POP STACK i
+STORE l
+PEEK STACK i
+STORE k
+PUSH k
+DISP
+END PROG""".split('\n')
+
+progFactorialOnlyLoop = """START PROG
+ASK
+STORE i
+PUSH 1
+STORE fact
+START LOOP ID1
+PUSH i
+PUSH 1
+GT
+JNE END_ID1
+PUSH fact
+PUSH i
+MUL
+STORE fact
+PUSH i
+PUSH 1
+SUB
+STORE i
+JMP START_ID1
+END ID1
+PUSH "factorialis"
+DISP
+PUSH fact
+DISP
+END PROG""".split('\n')
+
+progFibo = """START PROG
+START FUNC fibo
+STORE n
+PARAMOVER
+PUSH 0
+STORE GLOB_COND
+START IF ID1
+PUSH n
+PUSH 0
+EQ
+STORE GLOB_COND
+JNE END_ID1
+RET 0
+END ID1
+START ELSE-IF ID2
+PUSH n
+PUSH 1
+EQ
+STORE GLOB_COND
+JNE END_ID2
+RET 1
+END ID2
+PUSH n
+PUSH 1
+SUB
+STORE a
+CALL fibo a
+STORE I
+PUSH n
+PUSH 2
+SUB
+STORE b
+CALL fibo b
+STORE J
+PUSH I
+PUSH J
+ADD
+STORE F
+RET F
+END fibo
+CALL fibo 8
+STORE m
+PUSH m
+DISP
+END PROG""".split('\n')
+
+progDummy = """START PROG
+START FUNC test
+PARAMOVER
+PUSH 5
+STORE STACK i
+PUSH 0
+STORE GLOB_COND
+START IF ID1
+PUSH 1
+PUSH 0
+GT
+STORE GLOB_COND
+JNE END_ID1
+PUSH 6
+STORE STACK i
+POP STACK i
+STORE j
+PUSH j
+DISP
+END ID1
+PEEK STACK i
+STORE m
+PUSH m
+DISP
+END test
+CALL test
+END PROG""".split('\n')
+
 
 class SymbolTable:
     def __init__(self, isProgORFunc = False):
@@ -199,13 +402,11 @@ class InterpreterFull:
         self.line = self.program[self.ip]
         self.ip = self.ip + 1
         tokens = self.line.split()
-        # tokens = shlex.split(line)
         opcode = tokens.pop(0)
         if hasattr(self, opcode):
             getattr(self, opcode)(tokens)
         else:
-            print "bad opcode : ", opcode
-
+            print "Program terminated. Bad opcode : ", opcode
         if self.debug:
             print self.ip, " : ", self.line, " : ", "stack values : ", self.listSymbolTable[0].stack, " variables: ", self.listSymbolTable[0].map
 
@@ -236,18 +437,26 @@ class InterpreterFull:
                 x = int(val)
                 tempStack.insert(0, x)
             except ValueError:
-                i = self.lookup(val)
-                if i >= 0:
-                    tempStack.insert(0, self.listSymbolTable[i].map[val])
+                if val == "GLOB":
+                    isPresent = self.findGlobal(args[0])
+                    if isPresent == False:
+                        print "Program terminated. Global variable not present: ", args[1]
+                        exit()
+                    tempStack.insert(0, self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[0]])
+                    args.pop()
                 else:
-                    print val, " is undefined"
-                    exit()
+                    i = self.lookup(val)
+                    if i >= 0:
+                        tempStack.insert(0, self.listSymbolTable[i].map[val])
+                    else:
+                        print "Program terminated. Variable is undefined: ", val
+                        exit()
         self.listSymbolTable.insert(0, SymbolTable(True))
         self.listSymbolTable[0].stack = tempStack
 
     def PARAMOVER(self, args):
         if len(self.listSymbolTable[0].stack) > 0:
-            print "invalid function call"
+            print "Program terminated. Invalid function call"
             exit()
 
     def ASK(self, args):
@@ -262,29 +471,38 @@ class InterpreterFull:
             x = int(args[0])
             self.listSymbolTable[0].stack.insert(0, x)
         except ValueError:
-            i = self.lookup(args[0])
-            if i >= 0:
-                self.listSymbolTable[0].stack.insert(0, self.listSymbolTable[i].map[args[0]])
+            if args[0] == "GLOB":
+                isPresent = self.findGlobal(args[1])
+                if isPresent == False:
+                    print "Program terminated. Global variable not present: ", args[1]
+                    exit()
+                self.listSymbolTable[0].stack.insert(0, self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[1]])
             else:
-                print args[0], " is undefined"
-                exit()
+                i = self.lookup(args[0])
+                if i >= 0:
+                    self.listSymbolTable[0].stack.insert(0, self.listSymbolTable[i].map[args[0]])
+                else:
+                    print "Program terminated. Local variable undefined: ", args[0]
+                    exit()
+
+    def findGlobal(self, var):
+        if var in self.listSymbolTable[len(self.listSymbolTable) - 1].map:
+            return True
+        else:
+            return False
 
     def lookup(self, x):
         i = 0
         foundFunc = 0
         while i < len(self.listSymbolTable):
+            if foundFunc == 1:
+                break
             if self.listSymbolTable[i].isProgORFunc == True:
                 foundFunc = foundFunc + 1
-            if foundFunc > 1:
-                break
             if x in self.listSymbolTable[i].map:
                 return i
             i = i + 1
-
-        if x in self.listSymbolTable[len(self.listSymbolTable) - 1].map:
-            return len(self.listSymbolTable) - 1
-        else:
-            return -1
+        return -1
 
     def ADD(self, args):
         a = self.listSymbolTable[0].stack[1]
@@ -368,25 +586,24 @@ class InterpreterFull:
             newIp = self.createMapForLabels.labelAddress[args[0]]
             self.ip = newIp
 
-    def JNER(self, args):
-        if self.listSymbolTable[0].stack[0] != 1:
-            self.RET(args)
-
-    def JER(self, args):
-        if self.listSymbolTable[0].stack[0] == 1:
-            self.RET(args)
-
     def RET(self, args):
         val = args[0]
         try:
             retValue = int(val)
         except ValueError:
-            i = self.lookup(val)
-            if i >= 0:
-                retValue = self.listSymbolTable[i].map[val]
+            if args[0] == "GLOB":
+                isPresent = self.findGlobal(args[1])
+                if isPresent == False:
+                    print "Program terminated. Global variable not present: ", args[1]
+                    exit()
+                retValue = self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[1]]
             else:
-                print val, " is undefined"
-                exit()
+                i = self.lookup(args[0])
+                if i >= 0:
+                    retValue = self.listSymbolTable[i].map[args[0]]
+                else:
+                    print "Program terminated. Local variable undefined: ", args[0]
+                    exit()
         while self.listSymbolTable[0].isProgORFunc != True:
             self.listSymbolTable.pop(0)
         self.ip = self.ep.pop(0)
@@ -410,25 +627,145 @@ class InterpreterFull:
         else:
             self.listSymbolTable[0].stack.insert(0, 0)
 
+    def PEEK(self, args):
+        if len(args) < 2:
+            print "Program terminated. Invalid PEEK statement"
+            exit()
+        if args[1] == "GLOB":
+            isPresent = self.findGlobal(args[2])
+            if isPresent == False:
+                print "Program terminated. Global stack variable not present: ", args[2]
+                exit()
+            list = self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[2]]
+            if len(list) == 0:
+                print "Program terminated. Empty stack variable:", args[2]
+                exit()
+            self.listSymbolTable[0].stack.insert(0, list[0])
+        else:
+            i = self.lookup(args[1])
+            if i >= 0:
+                list = self.listSymbolTable[i].map[args[1]]
+                if len(list) == 0:
+                    print "Program terminated. Empty stack variable:", args[1]
+                    exit()
+                self.listSymbolTable[0].stack.insert(0, list[0])
+            else:
+                print "Program terminated. Stack variable is undefined:", args[1]
+                exit()
+
+    def POP(self, args):
+        if len(args) < 2:
+            print "Program terminated. Invalid POP statement"
+            exit()
+        if args[1] == "GLOB":
+            isPresent = self.findGlobal(args[2])
+            if isPresent == False:
+                print "Program terminated. Global stack variable not present: ", args[2]
+                exit()
+            list = self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[2]]
+            if len(list) == 0:
+                print "Program terminated. Empty stack variable:", args[2]
+                exit()
+            self.listSymbolTable[0].stack.insert(0, list.pop(0))
+            self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[2]] = list
+        else:
+            self.listSymbolTable[0].stack = []
+            if args[1] in self.listSymbolTable[0].map:
+                list = self.listSymbolTable[0].map[args[1]]
+                if len(list) == 0:
+                    print "Program terminated. Empty stack variable:", args[1]
+                    exit()
+                self.listSymbolTable[0].stack.insert(0, list.pop(0))
+                self.listSymbolTable[0].map[args[1]] = list
+            if len(self.listSymbolTable) > 1:
+                self.updateParentsRemoveValues(args[1])
+            if len(self.listSymbolTable[0].stack) == 0:
+                print "Program terminated. Stack variable not present:", args[1]
+                exit()
+
+    def updateParentsRemoveValues(self, var):
+        if self.listSymbolTable[0].isProgORFunc != True:
+            i = 1
+            foundFunc = 0
+            while i < len(self.listSymbolTable) - 1:
+                if foundFunc == 1:
+                    break
+                if self.listSymbolTable[i].isProgORFunc == True:
+                    foundFunc = foundFunc + 1
+                if var in self.listSymbolTable[i].map:
+                    list = self.listSymbolTable[i].map[var]
+                    if len(list) == 0:
+                        print "Program terminated. Empty stack variable:", var
+                        exit()
+                    self.listSymbolTable[0].stack.insert(0, list.pop(0))
+                    self.listSymbolTable[i].map[var] = list
+                i = i + 1
+
     def STORE(self, args):
+        isStack = False
         if len(self.listSymbolTable[0].stack) < 1:
-            print "Nothing in stack!"
+            print "Program terminated. Nothing in stack"
             exit()
         try:
             val = int(self.listSymbolTable[0].stack.pop(0))
         except ValueError:
-            print "Invalid Initialization"
+            print "Program terminated. Invalid Initialization"
             exit()
-        self.listSymbolTable[0].map[args[0]] = val
-        if len(self.listSymbolTable) > 1:
-            self.updateGlobal(args[0], val)
+        if args[0] == "GLOB":
+            isPresent = self.findGlobal(args[1])
+            if isPresent == False:
+                print "Program terminated. Global variable not present: ", args[1]
+                exit()
+            self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[1]] = val
+        elif args[0] == "STACK":
+            isStack = True
+            if args[1] == "GLOB":
+                isPresent = self.findGlobal(args[2])
+                if isPresent == False:
+                    print "Program terminated. Global stack variable not present: ", args[2]
+                    exit()
+                list = self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[2]]
+                list.insert(0, val)
+                self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[2]] = list
+            else:
+                if args[1] not in self.listSymbolTable[0].map:
+                    list = []
+                else:
+                    list = self.listSymbolTable[0].map[args[1]]
+                list.insert(0, val)
+                self.listSymbolTable[0].map[args[1]] = list
+                if len(self.listSymbolTable) > 1:
+                    self.updateParentsAddValues(args[1], val, isStack)
+        elif args[0] == "GLOB_COND":
+            self.listSymbolTable[0].map[args[0]] = val
+            self.listSymbolTable[0].stack.insert(0, val)
+        else:
+            self.listSymbolTable[0].map[args[0]] = val
+            if len(self.listSymbolTable) > 1:
+                self.updateParentsAddValues(args[0], val, isStack)
 
-    def updateGlobal(self, var, val):
-        globalSymbolTable = self.listSymbolTable[len(self.listSymbolTable) - 1]
-        if var in globalSymbolTable.map:
-            globalSymbolTable.map[var] = val
+    def updateParentsAddValues(self, var, val, isStack):
+        if self.listSymbolTable[0].isProgORFunc != True:
+            i = 1
+            foundFunc = 0
+            while i < len(self.listSymbolTable) - 1:
+                if foundFunc == 1:
+                    break
+                if self.listSymbolTable[i].isProgORFunc == True:
+                    foundFunc = foundFunc + 1
+                if var in self.listSymbolTable[i].map:
+                    if isStack:
+                        list = self.listSymbolTable[i].map[var]
+                        list.insert(0, val)
+                        self.listSymbolTable[i].map[var] = list
+                        self.listSymbolTable[0].map[var] = list
+                    else:
+                        self.listSymbolTable[i].map[var] = val
+                i = i + 1
 
     def DISP(self, args):
+        if len(self.listSymbolTable[0].stack) == 0:
+            print "Program terminated. Nothing to display"
         print self.listSymbolTable[0].stack.pop(0)
 
     def END(self, args):
@@ -438,5 +775,6 @@ class InterpreterFull:
             self.ip = self.ep.pop(0)
         self.listSymbolTable.pop(0)
 
-test = InterpreterFull(programFunc, False)
+
+test = InterpreterFull(progDummy, True)
 test.run()
