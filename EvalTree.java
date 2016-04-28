@@ -1,16 +1,18 @@
-
+import java.util.Stack;
 
 public class EvalTree extends HelloBaseVisitor<Integer>{			
 
-	int ifid = 0;
-	int loopid = 0;
-
+	int id = 0;
+	//int loopid = 0;
+	Stack ids = new Stack<Integer>();
 	@Override
 	public Integer visitConditionalStatement(HelloParser.ConditionalStatementContext ctx) {
 		// TODO Auto-generated method stub
 		System.out.println("PUSH 0");
 		System.out.println("STORE GLOB_COND");
-		System.out.println("START IF ID"+(++ifid));
+		++id;
+		ids.push(id);
+		System.out.println("START IF ID"+(id));
 		return super.visitConditionalStatement(ctx);
 	}
 
@@ -55,21 +57,23 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	public Integer visitConditionalStart(HelloParser.ConditionalStartContext ctx) {
 		// TODO Auto-generated method stub
 		System.out.println("STORE GLOB_COND");
-		System.out.println("JNE END_ID"+(ifid));
+		System.out.println("JNE END_ID"+(id));
 		return super.visitConditionalStart(ctx);
 	}
 	
 	@Override
 	public Integer visitConditionalEnd(HelloParser.ConditionalEndContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("END ID"+(ifid));
+		System.out.println("END ID"+(ids.pop()));
 		return super.visitConditionalEnd(ctx);
 	}
 	
 	@Override
 	public Integer visitEls(HelloParser.ElsContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("START ELSE ID"+(++ifid));
+		id++;
+		ids.push(id);
+		System.out.println("START ELSE ID"+(ids.peek()));
 		return super.visitEls(ctx);
 	}
 
@@ -82,29 +86,33 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	@Override
 	public Integer visitConditionElse(HelloParser.ConditionElseContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("START ELSE-IF ID"+(++ifid));
+		id++;
+		ids.push(id);
+		System.out.println("START ELSE-IF ID"+(ids.peek()));
 		return super.visitConditionElse(ctx);
 	}
 	
 	@Override
 	public Integer visitLoop(HelloParser.LoopContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("START LOOP ID"+(++loopid));
+		++id;
+		ids.push(id);
+		System.out.println("START LOOP ID"+(ids.peek()));
 		return super.visitLoop(ctx);
 	}
 
 	@Override
 	public Integer visitLoopStart(HelloParser.LoopStartContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("JNE END_ID"+loopid);
+		System.out.println("JNE END_ID"+ids.peek());
 		return super.visitLoopStart(ctx);
 	}
 
 	@Override
 	public Integer visitLoopend(HelloParser.LoopendContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("JMP START_ID"+loopid);
-		System.out.println("END ID"+loopid);
+		System.out.println("JMP START_ID"+ids.peek());
+		System.out.println("END ID"+ids.pop());
 		return super.visitLoopend(ctx);
 	}
 
