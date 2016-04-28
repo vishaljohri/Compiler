@@ -92,6 +92,7 @@ programTest = """START PROG
 PUSH 1
 STORE I
 START FUNC TEST
+PARAMOVER
 PUSH 7
 STORE I
 END TEST
@@ -99,7 +100,8 @@ START FUNC TEST1
 PUSH I
 DISP I
 END TEST1
-PUSH "Test         display"
+CALL TEST1
+PUSH "Test"
 DISP
 END PROG""".split('\n')
 
@@ -109,8 +111,8 @@ STORE I
 PARAMOVER
 PUSH I
 PUSH 1
-GT
-JNER 1
+LT
+JER 1
 PUSH I
 PUSH 1
 SUB
@@ -157,6 +159,86 @@ PUSH J
 DISP
 END PROG""".split('\n')
 
+prog = """START PROG
+PUSH 10
+STORE a
+PUSH 20
+STORE b
+PUSH 30
+STORE c
+PUSH 30
+STORE d
+PUSH 0
+STORE GLOB_COND
+START IF ID1
+PUSH b
+PUSH a
+GT
+STORE GLOB_COND
+JNE END_ID1
+PUSH a
+DISP
+END ID1
+START ELSE-IF ID2
+PUSH a
+PUSH b
+GT
+STORE GLOB_COND
+JNE END_ID2
+PUSH a
+DISP
+END ID2
+END PROG""".split('\n')
+
+progTestingWithInter = """START PROG
+PUSH 5
+STORE i
+START FUNC func1
+PUSH 7
+STORE GLOB i
+CALL func2
+PUSH GLOB i
+DISP
+END func1
+START FUNC func2
+PUSH 8
+STORE GLOB i
+END func2
+CALL func1
+END PROG""".split('\n')
+
+progNewOneRecursion = """START PROG
+START FUNC HELLO
+STORE i
+PARAMOVER
+PUSH 0
+STORE GLOB_COND
+START IF ID1
+PUSH i
+PUSH 1
+LT
+STORE GLOB_COND
+JNE END_ID1
+RET 1
+END ID1
+PUSH i
+PUSH 1
+SUB
+STORE l
+CALL HELLO l
+STORE K
+PUSH i
+PUSH K
+MUL
+STORE a
+RET a
+END HELLO
+CALL HELLO 5
+STORE f
+PUSH f
+DISP
+END PROG""".split('\n')
+
 
 class SymbolTable:
     def __init__(self, isProgORFunc = False):
@@ -199,13 +281,11 @@ class InterpreterFull:
         self.line = self.program[self.ip]
         self.ip = self.ip + 1
         tokens = self.line.split()
-        # tokens = shlex.split(line)
         opcode = tokens.pop(0)
         if hasattr(self, opcode):
             getattr(self, opcode)(tokens)
         else:
             print "bad opcode : ", opcode
-
         if self.debug:
             print self.ip, " : ", self.line, " : ", "stack values : ", self.listSymbolTable[0].stack, " variables: ", self.listSymbolTable[0].map
 
@@ -236,12 +316,20 @@ class InterpreterFull:
                 x = int(val)
                 tempStack.insert(0, x)
             except ValueError:
-                i = self.lookup(val)
-                if i >= 0:
-                    tempStack.insert(0, self.listSymbolTable[i].map[val])
+                if val == "GLOB":
+                    isPresent = self.findGlobal(args[0])
+                    if isPresent == False:
+                        print "Global variable not present: ", args[1]
+                        exit()
+                    tempStack.insert(0, self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[0]])
+                    args.pop()
                 else:
-                    print val, " is undefined"
-                    exit()
+                    i = self.lookup(val)
+                    if i >= 0:
+                        tempStack.insert(0, self.listSymbolTable[i].map[val])
+                    else:
+                        print val, " is undefined"
+                        exit()
         self.listSymbolTable.insert(0, SymbolTable(True))
         self.listSymbolTable[0].stack = tempStack
 
@@ -262,29 +350,38 @@ class InterpreterFull:
             x = int(args[0])
             self.listSymbolTable[0].stack.insert(0, x)
         except ValueError:
-            i = self.lookup(args[0])
-            if i >= 0:
-                self.listSymbolTable[0].stack.insert(0, self.listSymbolTable[i].map[args[0]])
+            if args[0] == "GLOB":
+                isPresent = self.findGlobal(args[1])
+                if isPresent == False:
+                    print "Global variable not present: ", args[1]
+                    exit()
+                self.listSymbolTable[0].stack.insert(0, self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[1]])
             else:
-                print args[0], " is undefined"
-                exit()
+                i = self.lookup(args[0])
+                if i >= 0:
+                    self.listSymbolTable[0].stack.insert(0, self.listSymbolTable[i].map[args[0]])
+                else:
+                    print args[0], " is undefined"
+                    exit()
+
+    def findGlobal(self, var):
+        if var in self.listSymbolTable[len(self.listSymbolTable) - 1].map:
+            return True
+        else:
+            return False
 
     def lookup(self, x):
         i = 0
         foundFunc = 0
         while i < len(self.listSymbolTable):
+            if foundFunc == 1:
+                break
             if self.listSymbolTable[i].isProgORFunc == True:
                 foundFunc = foundFunc + 1
-            if foundFunc > 1:
-                break
             if x in self.listSymbolTable[i].map:
                 return i
             i = i + 1
-
-        if x in self.listSymbolTable[len(self.listSymbolTable) - 1].map:
-            return len(self.listSymbolTable) - 1
-        else:
-            return -1
+        return -1
 
     def ADD(self, args):
         a = self.listSymbolTable[0].stack[1]
@@ -359,7 +456,7 @@ class InterpreterFull:
         self.ip = newIp
 
     def JNE(self, args):
-        if self.listSymbolTable[0].stack[0] != 1:
+        if self.listSymbolTable[0].map['GLOB_COND'] != 1:
             newIp = self.createMapForLabels.labelAddress[args[0]]
             self.ip = newIp
 
@@ -368,25 +465,24 @@ class InterpreterFull:
             newIp = self.createMapForLabels.labelAddress[args[0]]
             self.ip = newIp
 
-    def JNER(self, args):
-        if self.listSymbolTable[0].stack[0] != 1:
-            self.RET(args)
-
-    def JER(self, args):
-        if self.listSymbolTable[0].stack[0] == 1:
-            self.RET(args)
-
     def RET(self, args):
         val = args[0]
         try:
             retValue = int(val)
         except ValueError:
-            i = self.lookup(val)
-            if i >= 0:
-                retValue = self.listSymbolTable[i].map[val]
+            if args[0] == "GLOB":
+                isPresent = self.findGlobal(args[1])
+                if isPresent == False:
+                    print "Global variable not present: ", args[1]
+                    exit()
+                retValue = self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[1]]
             else:
-                print val, " is undefined"
-                exit()
+                i = self.lookup(args[0])
+                if i >= 0:
+                    retValue = self.listSymbolTable[i].map[args[0]]
+                else:
+                    print args[0], " is undefined"
+                    exit()
         while self.listSymbolTable[0].isProgORFunc != True:
             self.listSymbolTable.pop(0)
         self.ip = self.ep.pop(0)
@@ -410,7 +506,41 @@ class InterpreterFull:
         else:
             self.listSymbolTable[0].stack.insert(0, 0)
 
+    def PEEK(self, args):
+        pass
+
+    def POP(self, args):
+        if len(args) != 2:
+            print "invalid POP statement"
+            exit()
+        if args[1] in self.listSymbolTable[0].map:
+            list = self.listSymbolTable[0].map[args[1]]
+            self.listSymbolTable[0].stack.insert(0, list.pop(0))
+            self.listSymbolTable[0].map[args[1]] = list
+        if len(self.listSymbolTable) > 1:
+            self.updateParentStacks(args[1])
+
+    def updateParentStacks(self, var):
+        i = 1
+        foundFunc = 0
+        while i < len(self.listSymbolTable) - 1:
+            if foundFunc == 1:
+                break
+            if self.listSymbolTable[i].isProgORFunc == True:
+                foundFunc = foundFunc + 1
+            if var in self.listSymbolTable[i].map:
+                list = self.listSymbolTable[i].map[var]
+                self.listSymbolTable[0].stack.insert(0, list.pop(0))
+                self.listSymbolTable[i].map[var] = list
+            i = i + 1
+        globalSymbolTable = self.listSymbolTable[len(self.listSymbolTable) - 1]
+        if var in globalSymbolTable.map:
+            list = self.listSymbolTable[i].map[var]
+            self.listSymbolTable[0].stack.insert(0, list.pop(0))
+            self.listSymbolTable[i].map[var] = list
+
     def STORE(self, args):
+        isStack = False
         if len(self.listSymbolTable[0].stack) < 1:
             print "Nothing in stack!"
             exit()
@@ -419,14 +549,45 @@ class InterpreterFull:
         except ValueError:
             print "Invalid Initialization"
             exit()
-        self.listSymbolTable[0].map[args[0]] = val
-        if len(self.listSymbolTable) > 1:
-            self.updateGlobal(args[0], val)
+        if args[0] == "GLOB":
+            isPresent = self.findGlobal(args[1])
+            if isPresent == False:
+                print "Global variable not present: ", args[1]
+                exit()
+            self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[1]] = val
+        elif args[0] == "STACK":
+            isStack = True
+            if args[1] not in self.listSymbolTable[0].map:
+                list = []
+            else:
+                list = self.listSymbolTable[0].map[args[1]]
+            list.insert(0, val)
+            self.listSymbolTable[0].map[args[1]] = list
+        else:
+            self.listSymbolTable[0].map[args[0]] = val
+            if len(self.listSymbolTable) > 1:
+                self.updateParents(args[0], val, isStack)
 
-    def updateGlobal(self, var, val):
-        globalSymbolTable = self.listSymbolTable[len(self.listSymbolTable) - 1]
-        if var in globalSymbolTable.map:
-            globalSymbolTable.map[var] = val
+    def updateParents(self, var, val, isStack):
+        if self.listSymbolTable[0].isProgORFunc != True:
+            i = 1
+            foundFunc = 0
+            while i < len(self.listSymbolTable) - 1:
+                if foundFunc == 1:
+                    break
+                if self.listSymbolTable[i].isProgORFunc == True:
+                    foundFunc = foundFunc + 1
+                if var in self.listSymbolTable[i].map:
+                    if isStack:
+                        if var not in self.listSymbolTable[i].map:
+                            list = []
+                        else:
+                            list = self.listSymbolTable[i].map[var]
+                        list.insert(0, val)
+                        self.listSymbolTable[i].map[var] = list
+                    else:
+                        self.listSymbolTable[i].map[var] = val
+                i = i + 1
 
     def DISP(self, args):
         print self.listSymbolTable[0].stack.pop(0)
@@ -438,5 +599,6 @@ class InterpreterFull:
             self.ip = self.ep.pop(0)
         self.listSymbolTable.pop(0)
 
-test = InterpreterFull(programFunc, False)
+
+test = InterpreterFull(progNewOneRecursion, True)
 test.run()
