@@ -45,6 +45,9 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	@Override
 	public Integer visitInput(HelloParser.InputContext ctx) {
 		// TODO Auto-generated method stub
+		System.out.println("ASK");
+		System.out.println("STORE "+ctx.getChild(1).getText());
+		
 		return super.visitInput(ctx);
 	}
 
