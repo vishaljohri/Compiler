@@ -252,8 +252,24 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	@Override
 	public Integer visitPrint(HelloParser.PrintContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("PUSH "+ctx.getChild(1).getText());
-		System.out.println("DISP");
+		if(ctx.getChild(1).getChildCount() > 1){
+			String x = "";
+			for(int i=1;i<ctx.getChild(1).getChildCount()-1 ;i++){
+					if(i == ctx.getChild(1).getChildCount()-2){
+						x += ctx.getChild(1).getChild(i).getText();
+					}else{
+						x += ctx.getChild(1).getChild(i).getText() + " ";
+						
+					}
+			}
+			System.out.println("PUSH \""+x+"\"");
+			System.out.println("DISP");
+			
+		}else{
+			System.out.println("PUSH "+ctx.getChild(1).getText());
+			System.out.println("DISP");
+			
+		}
 		return super.visitPrint(ctx);
 	}
 
