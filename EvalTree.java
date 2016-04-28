@@ -326,6 +326,9 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		if(ctx.getChild(1).getChildCount() == 2){
 			System.out.println("CALL "+ctx.getChild(0).getText());
 		}
+			if(ctx.getParent().getChild(0) != null){
+				System.out.println("STORE "+ctx.getParent().getChild(0).getText());
+		}
 		
 		return super.visitFuncCall(ctx);
 	}
@@ -343,6 +346,11 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 			params += ctx.getChild(i).getText() + " ";
 		}
 		System.out.println("CALL "+ctx.getParent().getParent().getParent().getChild(0).getText()+" "+params);
+		
+		if(ctx.getParent().getParent().getParent().getParent().getChild(0) != null){
+			System.out.println("STORE "+ctx.getParent().getParent().getParent().getParent().getChild(0).getText());
+		}
+		
 		return super.visitFormalParameterCall(ctx);
 	}
 
