@@ -188,12 +188,18 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	@Override
 	public Integer visitStackOperation(HelloParser.StackOperationContext ctx) {
 		// TODO Auto-generated method stub
-		if(ctx.getChild(4).getChild(0) != null){
-			System.out.println("PUSH "+ctx.getChild(4).getChild(0).getText());
-		}else{
-			System.out.println("PUSH "+ctx.getChild(4).getText());
+		if(ctx.getChild(4) != null){
+			if(ctx.getChild(4).getChildCount() != 0){
+				
+				System.out.println("PUSH "+ctx.getChild(4).getChild(0).getText());
+				System.out.println("STORE STACK "+ctx.getChild(0).getText());
+			}else if(ctx.getChild(4).getChildCount() == 0){
+				System.out.println("PUSH "+ctx.getChild(4).getText());
+				System.out.println("STORE STACK "+ctx.getChild(0).getText());
+			}
 		}
-		System.out.println("STORE STACK "+ctx.getChild(0).getText());
+		
+		
 		return super.visitStackOperation(ctx);
 	}
 
@@ -202,12 +208,18 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		// TODO Auto-generated method stub
 		
 		if(ctx.getChild(2).getText().equals("pop")){
-			System.out.println("POP STACK "+ctx.getChild(0).getText());
 			
+			if(ctx.getParent().getChildCount() == 1){
+				System.out.println("POP STACK "+ctx.getChild(0).getText());
+			}else{
+				System.out.println("POP STACK "+ctx.getChild(0).getText());
+				System.out.println("STORE "+ctx.getParent().getChild(0).getText());
+			}			
 		}else{
 			System.out.println("PEEK STACK "+ctx.getChild(0).getText());
+			System.out.println("STORE "+ctx.getParent().getChild(0).getText());
 		}
-		System.out.println("STORE "+ctx.getParent().getChild(0).getText());
+		
 		return super.visitStackReturnOp(ctx);
 	}
 
