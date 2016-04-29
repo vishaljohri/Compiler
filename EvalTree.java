@@ -12,10 +12,11 @@ public class EvalTree extends TinyPyCBaseVisitor<Integer>{
 	Stack ids = new Stack<Integer>();
 	FileWriter fw;
 	PrintWriter pw;
-	File file = new File("Intermediate.bpc");
+	File file;
 	
-	public EvalTree() throws IOException {
+	public EvalTree(String fileName) throws IOException {
 		// TODO Auto-generated constructor stub
+		file = new File(fileName);
 		file.createNewFile();
 		fw = new FileWriter(file.getAbsoluteFile());
 		pw = new PrintWriter(fw);
@@ -61,8 +62,6 @@ public class EvalTree extends TinyPyCBaseVisitor<Integer>{
 	public Integer visitInput(TinyPyCParser.InputContext ctx) {
 		pw.println("ASK");
 		pw.println("STORE "+ctx.getChild(1).getText());
-		
-		
 		return super.visitInput(ctx);
 	}
 
@@ -70,7 +69,6 @@ public class EvalTree extends TinyPyCBaseVisitor<Integer>{
 	public Integer visitConditionalStart(TinyPyCParser.ConditionalStartContext ctx) {
 		pw.println("STORE GLOB_COND");
 		pw.println("JNE END_ID"+(id));
-		
 		return super.visitConditionalStart(ctx);
 	}
 	
@@ -254,8 +252,6 @@ public class EvalTree extends TinyPyCBaseVisitor<Integer>{
 			pw.println("PEEK STACK "+ctx.getChild(0).getText());
 			pw.println("STORE "+ctx.getParent().getChild(0).getText());
 		}
-		
-		
 		return super.visitStackReturnOp(ctx);
 	}
 	
@@ -362,7 +358,6 @@ public class EvalTree extends TinyPyCBaseVisitor<Integer>{
 			
 		}
 			
-		
 		return super.visitFuncCall(ctx);
 	}
 
@@ -374,7 +369,6 @@ public class EvalTree extends TinyPyCBaseVisitor<Integer>{
 	
 	@Override
 	public Integer visitFormalParameterCall(TinyPyCParser.FormalParameterCallContext ctx) {
-		
 		return super.visitFormalParameterCall(ctx);
 	}
 	
@@ -473,9 +467,6 @@ public class EvalTree extends TinyPyCBaseVisitor<Integer>{
 			//pw.write("Input -> "+ ctx.getChild(1).getChild(1).getChild(1).getText());
 			break;
 		}
-		
-		
-		
 		
 		return super.visitParExpression(ctx);
 	}
