@@ -2,364 +2,6 @@ __author__ = 'VISHAL'
 import re
 import shlex
 
-'''
-High level:-
------------
-
-number a=10
-number b=20
-condition(b>a)
-{
-    display b
-}
-else
-{
-	display a
-}
-'''
-
-program = """START PROG
-PUSH 10
-STORE A
-PUSH 1
-STORE B
-PUSH 0
-STORE GLOB_COND
-START IF ID1
-PUSH B
-PUSH A
-GT
-STORE GLOB_COND
-JNE END_ID1
-PUSH B
-DISP
-END ID1
-START ELSE-IF ID2
-PUSH B
-PUSH A
-EQ
-STORE GLOB_COND
-JNE END_ID2
-PUSH 1
-DISP
-END ID2
-START ELSE ID3
-PUSH A
-DISP
-END ID3
-END PROG""".split('\n')
-
-'''
-High level:-
------------
-
-read x
-number i = x
-number fact = 1
-while(i > 1)
-{
-    fact = fact * i
-    i = i - 1
-}
-display fact
-'''
-
-program1 = """START PROG
-ASK
-STORE I
-PUSH 1
-STORE fact
-START LOOP ID1
-PUSH I
-PUSH 1
-GT
-JNE END_ID1
-PUSH fact
-PUSH I
-MUL
-STORE fact
-PUSH I
-PUSH 1
-SUB
-STORE I
-JMP START_ID1
-END ID1
-PUSH fact
-DISP
-END PROG""".split('\n')
-
-programTest = """START PROG
-PUSH 1
-STORE I
-START FUNC TEST
-PARAMOVER
-PUSH 7
-STORE I
-END TEST
-START FUNC TEST1
-PUSH I
-DISP I
-END TEST1
-CALL TEST1
-PUSH "Test"
-DISP
-END PROG""".split('\n')
-
-programFunc = """START PROG
-START FUNC HELLO
-STORE I
-PARAMOVER
-PUSH I
-PUSH 1
-LT
-JER 1
-PUSH I
-PUSH 1
-SUB
-STORE Y
-CALL HELLO Y
-STORE K
-PUSH I
-PUSH K
-MUL
-STORE R
-RET R
-END HELLO
-CALL HELLO 5
-STORE F
-PUSH "Factorial is:"
-DISP
-PUSH F
-DISP
-END PROG""".split('\n')
-
-programFuncRetTest = """START PROG
-START FUNC TEST
-STORE I
-PARAMOVER
-START LOOP ID1
-PUSH I
-PUSH 1
-ADD
-STORE I
-PUSH I
-PUSH 5
-EQ
-JER I
-PUSH I
-PUSH 7
-LT
-JNE END_ID1
-JMP START_ID1
-END ID1
-END TEST
-CALL TEST 1
-STORE J
-PUSH J
-DISP
-END PROG""".split('\n')
-
-prog = """START PROG
-PUSH 10
-STORE a
-PUSH 20
-STORE b
-PUSH 30
-STORE c
-PUSH 30
-STORE d
-PUSH 0
-STORE GLOB_COND
-START IF ID1
-PUSH b
-PUSH a
-GT
-STORE GLOB_COND
-JNE END_ID1
-PUSH a
-DISP
-END ID1
-START ELSE-IF ID2
-PUSH a
-PUSH b
-GT
-STORE GLOB_COND
-JNE END_ID2
-PUSH a
-DISP
-END ID2
-END PROG""".split('\n')
-
-progTestingWithInter = """START PROG
-PUSH 5
-STORE i
-START FUNC func1
-PUSH 7
-STORE GLOB i
-CALL func2
-PUSH GLOB i
-DISP
-END func1
-START FUNC func2
-PUSH 8
-STORE GLOB i
-END func2
-CALL func1
-END PROG""".split('\n')
-
-progNewOneRecursionFactorial = """START PROG
-START FUNC HELLO
-STORE i
-PARAMOVER
-PUSH 0
-STORE GLOB_COND
-START IF ID1
-PUSH i
-PUSH 1
-LT
-STORE GLOB_COND
-JNE END_ID1
-RET 1
-END ID1
-PUSH i
-PUSH 1
-SUB
-STORE l
-CALL HELLO l
-STORE K
-PUSH i
-PUSH K
-MUL
-STORE a
-RET a
-END HELLO
-CALL HELLO 6
-STORE f
-PUSH f
-DISP
-END PROG""".split('\n')
-
-progStack = """START PROG
-PUSH 5
-STORE STACK i
-PUSH 6
-STORE STACK i
-PUSH 7
-STORE STACK i
-PUSH 8
-STORE STACK i
-POP STACK i
-STORE j
-PUSH j
-DISP
-POP STACK i
-STORE l
-PEEK STACK i
-STORE k
-PUSH k
-DISP
-END PROG""".split('\n')
-
-progFactorialOnlyLoop = """START PROG
-ASK
-STORE i
-PUSH 1
-STORE fact
-START LOOP ID1
-PUSH i
-PUSH 1
-GT
-JNE END_ID1
-PUSH fact
-PUSH i
-MUL
-STORE fact
-PUSH i
-PUSH 1
-SUB
-STORE i
-JMP START_ID1
-END ID1
-PUSH "factorialis"
-DISP
-PUSH fact
-DISP
-END PROG""".split('\n')
-
-progFibo = """START PROG
-START FUNC fibo
-STORE n
-PARAMOVER
-PUSH 0
-STORE GLOB_COND
-START IF ID1
-PUSH n
-PUSH 0
-EQ
-STORE GLOB_COND
-JNE END_ID1
-RET 0
-END ID1
-START ELSE-IF ID2
-PUSH n
-PUSH 1
-EQ
-STORE GLOB_COND
-JNE END_ID2
-RET 1
-END ID2
-PUSH n
-PUSH 1
-SUB
-STORE a
-CALL fibo a
-STORE I
-PUSH n
-PUSH 2
-SUB
-STORE b
-CALL fibo b
-STORE J
-PUSH I
-PUSH J
-ADD
-STORE F
-RET F
-END fibo
-CALL fibo 8
-STORE m
-PUSH m
-DISP
-END PROG""".split('\n')
-
-progDummy = """START PROG
-START FUNC test
-PARAMOVER
-PUSH 5
-STORE STACK i
-PUSH 0
-STORE GLOB_COND
-START IF ID1
-PUSH 1
-PUSH 0
-GT
-STORE GLOB_COND
-JNE END_ID1
-PUSH 6
-STORE STACK i
-POP STACK i
-STORE j
-PUSH j
-DISP
-END ID1
-PEEK STACK i
-STORE m
-PUSH m
-DISP
-END test
-CALL test
-END PROG""".split('\n')
-
 
 class SymbolTable:
     def __init__(self, isProgORFunc = False):
@@ -420,7 +62,7 @@ class InterpreterFull:
         elif args[0] == "FUNC":
             self.ip = self.createMapForLabels.labelAddress["END_" + args[1]] + 1
         elif args[0] == "ELSE-IF" or args[0] =="ELSE":
-            if self.listSymbolTable[0].map["GLOB_COND"] == 1:
+            if self.listSymbolTable[len(self.listSymbolTable) - 1].map["GLOB_COND"] == 1:
                 self.ip = self.createMapForLabels.labelAddress["END_" + args[1]] + 1
             else:
                 self.listSymbolTable.insert(0, SymbolTable())
@@ -471,7 +113,9 @@ class InterpreterFull:
             x = int(args[0])
             self.listSymbolTable[0].stack.insert(0, x)
         except ValueError:
-            if args[0] == "GLOB":
+            if args[0] == "True" or args[0] =="False":
+                self.listSymbolTable[0].stack.insert(0, args[0])
+            elif args[0] == "GLOB":
                 isPresent = self.findGlobal(args[1])
                 if isPresent == False:
                     print "Program terminated. Global variable not present: ", args[1]
@@ -687,7 +331,7 @@ class InterpreterFull:
         if self.listSymbolTable[0].isProgORFunc != True:
             i = 1
             foundFunc = 0
-            while i < len(self.listSymbolTable) - 1:
+            while i < len(self.listSymbolTable):
                 if foundFunc == 1:
                     break
                 if self.listSymbolTable[i].isProgORFunc == True:
@@ -707,10 +351,15 @@ class InterpreterFull:
             print "Program terminated. Nothing in stack"
             exit()
         try:
+            topValue = self.listSymbolTable[0].stack[0]
             val = int(self.listSymbolTable[0].stack.pop(0))
         except ValueError:
-            print "Program terminated. Invalid Initialization"
-            exit()
+            self.listSymbolTable[0].stack.insert(0, topValue)
+            if self.listSymbolTable[0].stack[0] == "True" or self.listSymbolTable[0].stack[0] == "False":
+                val = self.listSymbolTable[0].stack.pop(0)
+            else:
+                print "Program terminated. Invalid Initialization"
+                exit()
         if args[0] == "GLOB":
             isPresent = self.findGlobal(args[1])
             if isPresent == False:
@@ -737,7 +386,7 @@ class InterpreterFull:
                 if len(self.listSymbolTable) > 1:
                     self.updateParentsAddValues(args[1], val, isStack)
         elif args[0] == "GLOB_COND":
-            self.listSymbolTable[0].map[args[0]] = val
+            self.listSymbolTable[len(self.listSymbolTable) - 1].map[args[0]] = val
             self.listSymbolTable[0].stack.insert(0, val)
         else:
             self.listSymbolTable[0].map[args[0]] = val
@@ -748,7 +397,7 @@ class InterpreterFull:
         if self.listSymbolTable[0].isProgORFunc != True:
             i = 1
             foundFunc = 0
-            while i < len(self.listSymbolTable) - 1:
+            while i < len(self.listSymbolTable):
                 if foundFunc == 1:
                     break
                 if self.listSymbolTable[i].isProgORFunc == True:
@@ -775,6 +424,6 @@ class InterpreterFull:
             self.ip = self.ep.pop(0)
         self.listSymbolTable.pop(0)
 
-
-test = InterpreterFull(progDummy, True)
+intermediateProg = data = [line.strip() for line in open("BoolTypeInfiniteLoop.bpc", 'r')]
+test = InterpreterFull(intermediateProg, False)
 test.run()
