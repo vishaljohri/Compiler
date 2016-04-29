@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import java.util.Stack;
 
 
-public class EvalTree extends HelloBaseVisitor<Integer>{			
+public class EvalTree extends TinyPyCBaseVisitor<Integer>{			
 
 	int id = 0;
 	Stack ids = new Stack<Integer>();
@@ -22,7 +22,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 	
 	@Override
-	public Integer visitConditionalStatement(HelloParser.ConditionalStatementContext ctx) {
+	public Integer visitConditionalStatement(TinyPyCParser.ConditionalStatementContext ctx) {
 		pw.println("PUSH 0");
 		pw.println("STORE GLOB_COND");
 		++id;
@@ -32,33 +32,33 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitStart_prog(HelloParser.Start_progContext ctx) {
+	public Integer visitStart_prog(TinyPyCParser.Start_progContext ctx) {
 		pw.println("START PROG");
 		return super.visitStart_prog(ctx);
 	}
 
 	@Override
-	public Integer visitEnd_prog(HelloParser.End_progContext ctx) {
+	public Integer visitEnd_prog(TinyPyCParser.End_progContext ctx) {
 		pw.println("END PROG");
 		pw.flush();
 		return super.visitEnd_prog(ctx);
 	}
 
 	@Override
-	public Integer visitFunctionStart(HelloParser.FunctionStartContext ctx) {
+	public Integer visitFunctionStart(TinyPyCParser.FunctionStartContext ctx) {
 		pw.println("PARAMOVER");
 		// TODO Auto-generated method stub
 		return super.visitFunctionStart(ctx);
 	}
 
 	@Override
-	public Integer visitFunctionEnd(HelloParser.FunctionEndContext ctx) {
+	public Integer visitFunctionEnd(TinyPyCParser.FunctionEndContext ctx) {
 		pw.println("END "+ctx.getParent().getParent().getChild(1).getText());
 		return super.visitFunctionEnd(ctx);
 	}
 
 	@Override
-	public Integer visitInput(HelloParser.InputContext ctx) {
+	public Integer visitInput(TinyPyCParser.InputContext ctx) {
 		pw.println("ASK");
 		pw.println("STORE "+ctx.getChild(1).getText());
 		
@@ -67,7 +67,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitConditionalStart(HelloParser.ConditionalStartContext ctx) {
+	public Integer visitConditionalStart(TinyPyCParser.ConditionalStartContext ctx) {
 		pw.println("STORE GLOB_COND");
 		pw.println("JNE END_ID"+(id));
 		
@@ -75,13 +75,13 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 	
 	@Override
-	public Integer visitConditionalEnd(HelloParser.ConditionalEndContext ctx) {
+	public Integer visitConditionalEnd(TinyPyCParser.ConditionalEndContext ctx) {
 		pw.println("END ID"+(ids.pop()));
 		return super.visitConditionalEnd(ctx);
 	}
 	
 	@Override
-	public Integer visitEls(HelloParser.ElsContext ctx) {
+	public Integer visitEls(TinyPyCParser.ElsContext ctx) {
 		// TODO Auto-generated method stub
 		id++;
 		ids.push(id);
@@ -90,13 +90,13 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitCondition(HelloParser.ConditionContext ctx) {
+	public Integer visitCondition(TinyPyCParser.ConditionContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitCondition(ctx);
 	}
 
 	@Override
-	public Integer visitConditionElse(HelloParser.ConditionElseContext ctx) {
+	public Integer visitConditionElse(TinyPyCParser.ConditionElseContext ctx) {
 		// TODO Auto-generated method stub
 		id++;
 		ids.push(id);
@@ -105,7 +105,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 	
 	@Override
-	public Integer visitLoop(HelloParser.LoopContext ctx) {
+	public Integer visitLoop(TinyPyCParser.LoopContext ctx) {
 		// TODO Auto-generated method stub
 		++id;
 		ids.push(id);
@@ -114,13 +114,13 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitLoopStart(HelloParser.LoopStartContext ctx) {
+	public Integer visitLoopStart(TinyPyCParser.LoopStartContext ctx) {
 		pw.println("JNE END_ID"+ids.peek());
 		return super.visitLoopStart(ctx);
 	}
 
 	@Override
-	public Integer visitLoopend(HelloParser.LoopendContext ctx) {
+	public Integer visitLoopend(TinyPyCParser.LoopendContext ctx) {
 		// TODO Auto-generated method stub
 		
 		pw.println("JMP START_ID"+ids.peek());
@@ -129,31 +129,31 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitExpression(HelloParser.ExpressionContext ctx) {
+	public Integer visitExpression(TinyPyCParser.ExpressionContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitExpression(ctx);
 	}
 
 	@Override
-	public Integer visitVsc(HelloParser.VscContext ctx) {
+	public Integer visitVsc(TinyPyCParser.VscContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitVsc(ctx);
 	}
 
 	@Override
-	public Integer visitAddOp(HelloParser.AddOpContext ctx) {
+	public Integer visitAddOp(TinyPyCParser.AddOpContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitAddOp(ctx);
 	}
 
 	@Override
-	public Integer visitLoopStatement(HelloParser.LoopStatementContext ctx) {
+	public Integer visitLoopStatement(TinyPyCParser.LoopStatementContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitLoopStatement(ctx);
 	}
 
 	@Override
-	public Integer visitVaraiableInitialization(HelloParser.VaraiableInitializationContext ctx) {
+	public Integer visitVaraiableInitialization(TinyPyCParser.VaraiableInitializationContext ctx) {
 		// TODO Auto-generated method stub
 		
 		if(ctx.getChild(2).getChildCount() > 1){
@@ -223,7 +223,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitStackOperation(HelloParser.StackOperationContext ctx) {
+	public Integer visitStackOperation(TinyPyCParser.StackOperationContext ctx) {
 		if(ctx.getChild(4) != null){
 			if(ctx.getChild(4).getChildCount() != 0){
 				
@@ -241,7 +241,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitStackReturnOp(HelloParser.StackReturnOpContext ctx) {
+	public Integer visitStackReturnOp(TinyPyCParser.StackReturnOpContext ctx) {
 		if(ctx.getChild(2).getText().equals("pop")){
 			
 			if(ctx.getParent().getChildCount() == 1){
@@ -264,25 +264,25 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	
 
 	@Override
-	public Integer visitParams(HelloParser.ParamsContext ctx) {
+	public Integer visitParams(TinyPyCParser.ParamsContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitParams(ctx);
 	}
 
 	@Override
-	public Integer visitBody(HelloParser.BodyContext ctx) {
+	public Integer visitBody(TinyPyCParser.BodyContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitBody(ctx);
 	}
 
 	@Override
-	public Integer visitMessage(HelloParser.MessageContext ctx) {
+	public Integer visitMessage(TinyPyCParser.MessageContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitMessage(ctx);
 	}
 
 	@Override
-	public Integer visitPrint(HelloParser.PrintContext ctx) {
+	public Integer visitPrint(TinyPyCParser.PrintContext ctx) {
 		if(ctx.getChild(1).getChildCount() > 1){
 			String x = "";
 			for(int i=1;i<ctx.getChild(1).getChildCount()-1 ;i++){
@@ -310,19 +310,19 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitMulOp(HelloParser.MulOpContext ctx) {
+	public Integer visitMulOp(TinyPyCParser.MulOpContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitMulOp(ctx);
 	}
 
 	@Override
-	public Integer visitRelationalOp(HelloParser.RelationalOpContext ctx) {
+	public Integer visitRelationalOp(TinyPyCParser.RelationalOpContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitRelationalOp(ctx);
 	}
 
 	@Override
-	public Integer visitFunction(HelloParser.FunctionContext ctx) {
+	public Integer visitFunction(TinyPyCParser.FunctionContext ctx) {
 		pw.println("START FUNC "+ctx.getChild(1).getText());
 		return super.visitFunction(ctx);
 	}
@@ -330,7 +330,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	
 
 	@Override
-	public Integer visitStatement(HelloParser.StatementContext ctx) {
+	public Integer visitStatement(TinyPyCParser.StatementContext ctx) {
 		// TODO Auto-generated method stub
 //		if(){
 //			
@@ -339,19 +339,19 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitIntegerLiteral(HelloParser.IntegerLiteralContext ctx) {
+	public Integer visitIntegerLiteral(TinyPyCParser.IntegerLiteralContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitIntegerLiteral(ctx);
 	}
 
 	@Override
-	public Integer visitTerm(HelloParser.TermContext ctx) {
+	public Integer visitTerm(TinyPyCParser.TermContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitTerm(ctx);
 	}
 
 	@Override
-	public Integer visitFuncCall(HelloParser.FuncCallContext ctx) {
+	public Integer visitFuncCall(TinyPyCParser.FuncCallContext ctx) {
 		// TODO Auto-generated method stub
 		
 		if(ctx.getChild(1).getChildCount() == 2){
@@ -367,19 +367,19 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitFactor(HelloParser.FactorContext ctx) {
+	public Integer visitFactor(TinyPyCParser.FactorContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitFactor(ctx);
 	}
 	
 	@Override
-	public Integer visitFormalParameterCall(HelloParser.FormalParameterCallContext ctx) {
+	public Integer visitFormalParameterCall(TinyPyCParser.FormalParameterCallContext ctx) {
 		
 		return super.visitFormalParameterCall(ctx);
 	}
 	
 	@Override
-	public Integer visitParamListCall(HelloParser.ParamListCallContext ctx) {
+	public Integer visitParamListCall(TinyPyCParser.ParamListCallContext ctx) {
 		// TODO Auto-generated method stub
 			
 		if(ctx.getChildCount()>1){
@@ -413,7 +413,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitParamList(HelloParser.ParamListContext ctx) {
+	public Integer visitParamList(TinyPyCParser.ParamListContext ctx) {
 		// TODO Auto-generated method stub
 		
 		
@@ -421,7 +421,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 	
 	@Override
-	public Integer visitFormalParameter(HelloParser.FormalParameterContext ctx) {
+	public Integer visitFormalParameter(TinyPyCParser.FormalParameterContext ctx) {
 		// TODO Auto-generated method stub
 		for(int i=0;i<ctx.getChildCount();i++){
 				pw.println("STORE "+ctx.getChild(i).getText());
@@ -430,7 +430,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitParExpression(HelloParser.ParExpressionContext ctx) {
+	public Integer visitParExpression(TinyPyCParser.ParExpressionContext ctx) {
 		pw.println("PUSH "+ctx.getChild(1).getChild(0).getText());
 		pw.println("PUSH "+ctx.getChild(1).getChild(2).getText());
 		
@@ -481,13 +481,13 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	}
 
 	@Override
-	public Integer visitRetValue(HelloParser.RetValueContext ctx) {
+	public Integer visitRetValue(TinyPyCParser.RetValueContext ctx) {
 		pw.println("RET "+ctx.getChild(0).getText());
 		return super.visitRetValue(ctx);
 	}
 
 	@Override
-	public Integer visitPrimary(HelloParser.PrimaryContext ctx) {
+	public Integer visitPrimary(TinyPyCParser.PrimaryContext ctx) {
 		// TODO Auto-generated method stub
 		return super.visitPrimary(ctx);
 	}
