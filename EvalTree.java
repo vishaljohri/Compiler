@@ -386,10 +386,23 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 			String a[] = ctx.getText().split(",");
 			String x="";
 			for(int i=0;i<a.length;i++){
-				x += " "+ a[i];
+				if(a[i].contains(":")){
+					String b[] = a[i].split(":");
+					x += " GLOB "+ b[1];
+				}else{
+					x += " "+ a[i];
+				}
+				
 			}
 			pw.println("CALL "+ctx.getParent().getParent().getChild(0).getText()+x);
 			
+		}else if(ctx.getChildCount()==1){
+			if(ctx.getChild(0).getChild(0).getText().contains(":")){
+				String b[] = ctx.getChild(0).getChild(0).getText().split(":");
+				pw.println("CALL "+ctx.getParent().getParent().getChild(0).getText()+ " GLOB "+ b[1]);
+			}else{
+				pw.println("CALL "+ctx.getParent().getParent().getChild(0).getText()+ " "+ctx.getChild(0).getChild(0).getText());
+			}
 		}
 		
 		if(ctx.getParent().getParent().getParent().getText().contains("=")){
