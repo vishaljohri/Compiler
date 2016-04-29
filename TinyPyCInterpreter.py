@@ -103,7 +103,9 @@ class InterpreterFull:
             exit()
 
     def ASK(self, args):
-        self.PUSH(raw_input())
+        inputList = []
+        inputList.insert(0, raw_input())
+        self.PUSH(inputList)
 
     def PUSH(self, args):
         if len(re.findall(r'\"(.+?)',args[0])) >= 1:
@@ -220,6 +222,8 @@ class InterpreterFull:
     def JMP(self, args):
         newIp = self.createMapForLabels.labelAddress[args[0]]
         self.ip = newIp
+        if "LOOP" in self.program[self.ip]:
+            self.ip = self.ip + 1
 
     def JNE(self, args):
         if self.listSymbolTable[0].stack[0] != 1:
@@ -427,5 +431,5 @@ class InterpreterFull:
 
 progName = sys.argv[1]
 intermediateProg = [line.strip() for line in open(progName, 'r')]
-test = InterpreterFull(intermediateProg, True)
+test = InterpreterFull(intermediateProg, False)
 test.run()
