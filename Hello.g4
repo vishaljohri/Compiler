@@ -83,7 +83,6 @@ retValue
 	: IDENTIFIER 
 	| integerLiteral
 	;
-
 	
 stackOperation
 	: IDENTIFIER '.' 'push' '('integerLiteral')'
@@ -124,6 +123,7 @@ expression
 	| expression 'or' expression
 	| term addOp expression
 	| term
+	| boolValues
 	;
 	
 term
@@ -209,6 +209,12 @@ varaiableInitialization
 	: IDENTIFIER '=' funcCall
 	| IDENTIFIER '=' expression 
 	| IDENTIFIER '=' stackReturnOp 
+	| IDENTIFIER '=' boolValues
+	;
+	
+boolValues
+	: 'True'
+	| 'False'
 	;
 
 
@@ -219,9 +225,3 @@ IDENTIFIER
 WS 
 	: [ \t\r\n]+ -> skip 
 	;
-	
-/*
-r  : 'hello' IDENTIFIER 'stop';         // match keyword hello followed by an IDENTIFIERentifier
-IDENTIFIER : [a-z]+ ;             // match lower-case IDENTIFIERentifiers
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
-*/
