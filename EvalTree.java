@@ -186,7 +186,13 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 			System.out.println("STORE "+ctx.getChild(0).getText());
 		}else{
 			System.out.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
-			System.out.println("STORE "+ctx.getChild(0).getText());
+			if(ctx.getChild(0).getText().contains(":")){
+				String a[] = ctx.getChild(0).getText().split(":");
+				System.out.println("STORE GLOB "+a[1]);
+			}else{
+				System.out.println("STORE "+ctx.getChild(0).getText());
+			}
+			
 		}
 		
 		
@@ -326,7 +332,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		if(ctx.getChild(1).getChildCount() == 2){
 			System.out.println("CALL "+ctx.getChild(0).getText());
 		}
-			if(ctx.getParent().getChild(0) != null){
+			if(ctx.getParent().getText().contains("=")){
 				System.out.println("STORE "+ctx.getParent().getChild(0).getText());
 		}
 		
