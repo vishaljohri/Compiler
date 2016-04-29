@@ -200,7 +200,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		}else{
 			
 			if(ctx.getChild(2).getChild(0).getChild(0).getText().contains(":")){
-				String a[] = ctx.getChild(0).getText().split(":");
+				String a[] = ctx.getChild(2).getChild(0).getChild(0).getText().split(":");
 				pw.println("PUSH GLOB "+a[1]);
 			}else{
 				pw.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
