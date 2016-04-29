@@ -1,70 +1,81 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Stack;
 
 public class EvalTree extends HelloBaseVisitor<Integer>{			
 
 	int id = 0;
-	//int loopid = 0;
 	Stack ids = new Stack<Integer>();
+	FileWriter fw;
+	PrintWriter pw;
+	File file = new File("Intermediate.bpc");
+	
+	public EvalTree() throws IOException {
+		// TODO Auto-generated constructor stub
+		file.createNewFile();
+		fw = new FileWriter(file.getAbsoluteFile());
+		pw = new PrintWriter(fw);
+	}
+	
 	@Override
 	public Integer visitConditionalStatement(HelloParser.ConditionalStatementContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("PUSH 0");
-		System.out.println("STORE GLOB_COND");
+		pw.println("PUSH 0");
+		pw.println("STORE GLOB_COND");
 		++id;
 		ids.push(id);
-		System.out.println("START IF ID"+(id));
+		pw.println("START IF ID"+(id));
 		return super.visitConditionalStatement(ctx);
 	}
 
 	@Override
 	public Integer visitStart_prog(HelloParser.Start_progContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("START PROG");
+		pw.println("START PROG");
 		return super.visitStart_prog(ctx);
 	}
 
 	@Override
 	public Integer visitEnd_prog(HelloParser.End_progContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("END PROG");
+		pw.println("END PROG");
+		pw.flush();
 		return super.visitEnd_prog(ctx);
 	}
 
 	@Override
 	public Integer visitFunctionStart(HelloParser.FunctionStartContext ctx) {
-		System.out.println("PARAMOVER");
+		pw.println("PARAMOVER");
 		// TODO Auto-generated method stub
 		return super.visitFunctionStart(ctx);
 	}
 
 	@Override
 	public Integer visitFunctionEnd(HelloParser.FunctionEndContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("END "+ctx.getParent().getParent().getChild(1).getText());
+		pw.println("END "+ctx.getParent().getParent().getChild(1).getText());
 		return super.visitFunctionEnd(ctx);
 	}
 
 	@Override
 	public Integer visitInput(HelloParser.InputContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("ASK");
-		System.out.println("STORE "+ctx.getChild(1).getText());
+		pw.println("ASK");
+		pw.println("STORE "+ctx.getChild(1).getText());
+		
 		
 		return super.visitInput(ctx);
 	}
 
 	@Override
 	public Integer visitConditionalStart(HelloParser.ConditionalStartContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("STORE GLOB_COND");
-		System.out.println("JNE END_ID"+(id));
+		pw.println("STORE GLOB_COND");
+		pw.println("JNE END_ID"+(id));
+		
 		return super.visitConditionalStart(ctx);
 	}
 	
 	@Override
 	public Integer visitConditionalEnd(HelloParser.ConditionalEndContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("END ID"+(ids.pop()));
+		pw.println("END ID"+(ids.pop()));
 		return super.visitConditionalEnd(ctx);
 	}
 	
@@ -73,7 +84,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		// TODO Auto-generated method stub
 		id++;
 		ids.push(id);
-		System.out.println("START ELSE ID"+(ids.peek()));
+		pw.println("START ELSE ID"+(ids.peek()));
 		return super.visitEls(ctx);
 	}
 
@@ -88,7 +99,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		// TODO Auto-generated method stub
 		id++;
 		ids.push(id);
-		System.out.println("START ELSE-IF ID"+(ids.peek()));
+		pw.println("START ELSE-IF ID"+(ids.peek()));
 		return super.visitConditionElse(ctx);
 	}
 	
@@ -97,22 +108,22 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		// TODO Auto-generated method stub
 		++id;
 		ids.push(id);
-		System.out.println("START LOOP ID"+(ids.peek()));
+		pw.println("START LOOP ID"+(ids.peek()));
 		return super.visitLoop(ctx);
 	}
 
 	@Override
 	public Integer visitLoopStart(HelloParser.LoopStartContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("JNE END_ID"+ids.peek());
+		pw.println("JNE END_ID"+ids.peek());
 		return super.visitLoopStart(ctx);
 	}
 
 	@Override
 	public Integer visitLoopend(HelloParser.LoopendContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("JMP START_ID"+ids.peek());
-		System.out.println("END ID"+ids.pop());
+		
+		pw.println("JMP START_ID"+ids.peek());
+		pw.println("END ID"+ids.pop());
 		return super.visitLoopend(ctx);
 	}
 
@@ -143,54 +154,55 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	@Override
 	public Integer visitVaraiableInitialization(HelloParser.VaraiableInitializationContext ctx) {
 		// TODO Auto-generated method stub
+		
 		if(ctx.getChild(2).getChildCount() > 1){
-//			System.out.println(ctx.getChild(2).getText());
+//				pw.println(ctx.getChild(2).getText());
 			if(ctx.getChild(2).getText().contains("pop") || ctx.getChild(2).getText().contains("peek")){
 				
 			}else if(ctx.getChild(2).getText().contains("+") || ctx.getChild(2).getText().contains("-")){
-				System.out.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
-				System.out.println("PUSH "+ctx.getChild(2).getChild(2).getChild(0).getChild(0).getText());
+				pw.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
+				pw.println("PUSH "+ctx.getChild(2).getChild(2).getChild(0).getChild(0).getText());
 			
 				switch (ctx.getChild(2).getChild(1).getText()) {
 				case "+":
-						System.out.println("ADD");
+						pw.println("ADD");
 						break;
 				case "-":
-						System.out.println("SUB");
+						pw.println("SUB");
 					
 					break;
 				
 				default:
 					break;
 				}
-				System.out.println("STORE "+ctx.getChild(0).getText());
+				pw.println("STORE "+ctx.getChild(0).getText());
 				
 			}
 			
 			
 		}else if(ctx.getChild(2).getChild(0).getChildCount() > 1){
-			System.out.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
-			System.out.println("PUSH "+ctx.getChild(2).getChild(0).getChild(2).getChild(0).getText());
+			pw.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
+			pw.println("PUSH "+ctx.getChild(2).getChild(0).getChild(2).getChild(0).getText());
 		
 			switch (ctx.getChild(2).getChild(0).getChild(1).getText()) {
 			
 			case "*":
-					System.out.println("MUL");
+					pw.println("MUL");
 					break;
 			case "/":		
-					System.out.println("DIV");
+					pw.println("DIV");
 				break;
 			default:
 				break;
 			}
-			System.out.println("STORE "+ctx.getChild(0).getText());
+			pw.println("STORE "+ctx.getChild(0).getText());
 		}else{
-			System.out.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
+			pw.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
 			if(ctx.getChild(0).getText().contains(":")){
 				String a[] = ctx.getChild(0).getText().split(":");
-				System.out.println("STORE GLOB "+a[1]);
+				pw.println("STORE GLOB "+a[1]);
 			}else{
-				System.out.println("STORE "+ctx.getChild(0).getText());
+				pw.println("STORE "+ctx.getChild(0).getText());
 			}
 			
 		}
@@ -201,17 +213,17 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 
 	@Override
 	public Integer visitStackOperation(HelloParser.StackOperationContext ctx) {
-		// TODO Auto-generated method stub
 		if(ctx.getChild(4) != null){
 			if(ctx.getChild(4).getChildCount() != 0){
 				
-				System.out.println("PUSH "+ctx.getChild(4).getChild(0).getText());
-				System.out.println("STORE STACK "+ctx.getChild(0).getText());
+				pw.println("PUSH "+ctx.getChild(4).getChild(0).getText());
+				pw.println("STORE STACK "+ctx.getChild(0).getText());
 			}else if(ctx.getChild(4).getChildCount() == 0){
-				System.out.println("PUSH "+ctx.getChild(4).getText());
-				System.out.println("STORE STACK "+ctx.getChild(0).getText());
+				pw.println("PUSH "+ctx.getChild(4).getText());
+				pw.println("STORE STACK "+ctx.getChild(0).getText());
 			}
 		}
+		
 		
 		
 		return super.visitStackOperation(ctx);
@@ -219,20 +231,19 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 
 	@Override
 	public Integer visitStackReturnOp(HelloParser.StackReturnOpContext ctx) {
-		// TODO Auto-generated method stub
-		
 		if(ctx.getChild(2).getText().equals("pop")){
 			
 			if(ctx.getParent().getChildCount() == 1){
-				System.out.println("POP STACK "+ctx.getChild(0).getText());
+				pw.println("POP STACK "+ctx.getChild(0).getText());
 			}else{
-				System.out.println("POP STACK "+ctx.getChild(0).getText());
-				System.out.println("STORE "+ctx.getParent().getChild(0).getText());
+				pw.println("POP STACK "+ctx.getChild(0).getText());
+				pw.println("STORE "+ctx.getParent().getChild(0).getText());
 			}			
 		}else{
-			System.out.println("PEEK STACK "+ctx.getChild(0).getText());
-			System.out.println("STORE "+ctx.getParent().getChild(0).getText());
+			pw.println("PEEK STACK "+ctx.getChild(0).getText());
+			pw.println("STORE "+ctx.getParent().getChild(0).getText());
 		}
+		
 		
 		return super.visitStackReturnOp(ctx);
 	}
@@ -257,7 +268,6 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 
 	@Override
 	public Integer visitPrint(HelloParser.PrintContext ctx) {
-		// TODO Auto-generated method stub
 		if(ctx.getChild(1).getChildCount() > 1){
 			String x = "";
 			for(int i=1;i<ctx.getChild(1).getChildCount()-1 ;i++){
@@ -268,14 +278,18 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 						
 					}
 			}
-			System.out.println("PUSH \""+x+"\"");
-			System.out.println("DISP");
+			pw.println("PUSH \""+x+"\"");
+			pw.println("DISP");
 			
+		}else if(ctx.getChild(1).getText().contains(":")){
+			String a[] = ctx.getChild(1).getText().split(":");
+			pw.println("PUSH GLOB "+a[1]);
 		}else{
-			System.out.println("PUSH "+ctx.getChild(1).getText());
-			System.out.println("DISP");
+			pw.println("PUSH "+ctx.getChild(1).getText());
+			pw.println("DISP");
 			
 		}
+		
 		return super.visitPrint(ctx);
 	}
 
@@ -293,8 +307,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 
 	@Override
 	public Integer visitFunction(HelloParser.FunctionContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("START FUNC "+ctx.getChild(1).getText());
+		pw.println("START FUNC "+ctx.getChild(1).getText());
 		return super.visitFunction(ctx);
 	}
 
@@ -330,11 +343,13 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		// TODO Auto-generated method stub
 		
 		if(ctx.getChild(1).getChildCount() == 2){
-			System.out.println("CALL "+ctx.getChild(0).getText());
-		}
+			pw.println("CALL "+ctx.getChild(0).getText());
 			if(ctx.getParent().getText().contains("=")){
-				System.out.println("STORE "+ctx.getParent().getChild(0).getText());
+				pw.println("STORE "+ctx.getParent().getChild(0).getText());
+			}
+			
 		}
+			
 		
 		return super.visitFuncCall(ctx);
 	}
@@ -351,10 +366,11 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		for(int i=0;i<ctx.getChildCount();i++){
 			params += ctx.getChild(i).getText() + " ";
 		}
-		System.out.println("CALL "+ctx.getParent().getParent().getParent().getChild(0).getText()+" "+params);
+		
+		pw.println("CALL "+ctx.getParent().getParent().getParent().getChild(0).getText()+" "+params);
 		
 		if(ctx.getParent().getParent().getParent().getParent().getChild(0) != null){
-			System.out.println("STORE "+ctx.getParent().getParent().getParent().getParent().getChild(0).getText());
+			pw.println("STORE "+ctx.getParent().getParent().getParent().getParent().getChild(0).getText());
 		}
 		
 		return super.visitFormalParameterCall(ctx);
@@ -364,66 +380,65 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	public Integer visitFormalParameter(HelloParser.FormalParameterContext ctx) {
 		// TODO Auto-generated method stub
 		for(int i=0;i<ctx.getChildCount();i++){
-				System.out.println("STORE "+ctx.getChild(i).getText());
+				pw.println("STORE "+ctx.getChild(i).getText());
 			}
 		return super.visitFormalParameter(ctx);
 	}
 
 	@Override
 	public Integer visitParExpression(HelloParser.ParExpressionContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("PUSH "+ctx.getChild(1).getChild(0).getText());
-		System.out.println("PUSH "+ctx.getChild(1).getChild(2).getText());
-		
-		
+		pw.println("PUSH "+ctx.getChild(1).getChild(0).getText());
+		pw.println("PUSH "+ctx.getChild(1).getChild(2).getText());
 		
 		switch (ctx.getChild(1).getChild(1).getText()) {
 		case ">":
-			System.out.println("GT");
+			pw.println("GT");
 			//pw.write("GT");
 			break;
 		case ">=":
-			System.out.println("GTE");
+			pw.println("GTE");
 			//pw.write("GTE");
 			break;
 		case "=>":
-			System.out.println("GTE");
+			pw.println("GTE");
 			//pw.write("GTE");
 			break;
 		case "<":
-			System.out.println("LT");
+			pw.println("LT");
 			//pw.write("LT");
 			break;
 		case "<=":
-			System.out.println("LTE");
+			pw.println("LTE");
 			//pw.write("LTE");
 			break;
 		case "=<":
-			System.out.println("LTE");
+			pw.println("LTE");
 			//pw.write("LTE");
 			break;
 		case "==":
-			System.out.println("EQ");
+			pw.println("EQ");
 			//pw.write("EQ");
 			break;
 		case "!=":
-			System.out.println("NEQ");
+			pw.println("NEQ");
 		//	pw.write("NEQ");
 			break;
 
 		default:
-			System.out.println("Input -> "+ ctx.getChild(1).getChild(1).getChild(1).getText());
+			pw.println("Input -> "+ ctx.getChild(1).getChild(1).getChild(1).getText());
 			//pw.write("Input -> "+ ctx.getChild(1).getChild(1).getChild(1).getText());
 			break;
 		}
+		
+		
+		
 		
 		return super.visitParExpression(ctx);
 	}
 
 	@Override
 	public Integer visitRetValue(HelloParser.RetValueContext ctx) {
-		// TODO Auto-generated method stub
-		System.out.println("RET "+ctx.getChild(0).getText());
+		pw.println("RET "+ctx.getChild(0).getText());
 		return super.visitRetValue(ctx);
 	}
 
