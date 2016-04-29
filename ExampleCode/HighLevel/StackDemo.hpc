@@ -1,0 +1,11 @@
+START PROG
+i.push(5)
+i.push(6)
+i.push(7)
+i.push(8)
+j = i.pop()
+display j
+i.pop()
+k = i.peek()
+display k
+END PROG

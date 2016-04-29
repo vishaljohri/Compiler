@@ -1,0 +1,6 @@
+START PROG
+i = True
+loop(i == True) {
+	display "inside infinite loop"
+}
+END PROG

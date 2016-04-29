@@ -1,0 +1,8 @@
+START PROG
+i = 1
+j = 10
+loop(i <= j) {
+	display i
+	i = i + 1
+}
+END PROG

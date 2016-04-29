@@ -1,0 +1,17 @@
+START PROG
+def fact(i)
+{
+	condition(i < 1) {
+		return 1
+	}
+	j = i - 1
+	k = fact(j)
+	a = i*k
+	return a
+}
+display "Enter no for which you want factorial"
+ask i
+f = fact(i)
+display "Factorial is"
+display f
+END PROG

@@ -1,0 +1,29 @@
+START PROG
+START FUNC printSequence
+STORE start
+STORE end
+PARAMOVER
+START LOOP ID1
+PUSH start
+PUSH end
+LTE
+JNE END_ID1
+PUSH start
+DISP
+PUSH start
+PUSH 1
+ADD
+STORE start
+JMP START_ID1
+END ID1
+END printSequence
+PUSH "Starting no"
+DISP
+ASK
+STORE i
+PUSH "Ending no"
+DISP
+ASK
+STORE j
+CALL printSequence i j
+END PROG

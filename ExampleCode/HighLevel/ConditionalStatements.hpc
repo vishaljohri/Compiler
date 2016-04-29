@@ -1,0 +1,13 @@
+START PROG
+display "enter no "
+ask i
+condition(i < 5) {
+	display "no less than 5"
+}
+else-condition(i == 5) {
+	display "no equal to 5"
+}
+else {
+	display "no greater than 5"
+}
+END PROG

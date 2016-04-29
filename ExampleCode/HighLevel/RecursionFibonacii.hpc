@@ -1,0 +1,22 @@
+START PROG
+def fibo(n)
+{
+	condition(n == 0) {
+		return 0
+	}
+	else-condition(n == 1) {
+		return 1
+	}
+	a = n - 1
+	i = fibo(a)
+	b = n - 2
+	j = fibo(b)
+	f = i + j
+	return f
+}
+display "Enter sequence no for fibonacii"
+ask s
+m = fibo(s)
+display "Fibonacii no is"
+display m
+END PROG

@@ -1,0 +1,27 @@
+START PROG
+PUSH "Enter no for which you want factorial"
+DISP
+ASK
+STORE i
+PUSH 1
+STORE fact
+START LOOP ID1
+PUSH i
+PUSH 1
+GT
+JNE END_ID1
+PUSH fact
+PUSH i
+MUL
+STORE fact
+PUSH i
+PUSH 1
+SUB
+STORE i
+JMP START_ID1
+END ID1
+PUSH "factorial is"
+DISP
+PUSH fact
+DISP
+END PROG

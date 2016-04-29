@@ -1,0 +1,14 @@
+START PROG
+i = 5
+def func1() {
+	i = 7
+	func2()
+	display i
+	display glob:i
+}
+def func2() {
+	i = 8
+	glob:i = 10
+}
+func1()
+END PROG

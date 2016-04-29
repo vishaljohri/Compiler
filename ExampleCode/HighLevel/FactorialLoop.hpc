@@ -1,0 +1,12 @@
+START PROG
+display "Enter no for which you want factorial "
+ask i
+fact = 1
+loop(i > 1)
+{
+    fact = fact * i
+    i = i - 1
+}
+display "factorial is"
+display fact
+END PROG

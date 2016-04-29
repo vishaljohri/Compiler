@@ -1,0 +1,13 @@
+START PROG
+def printSequence(start, end) {
+	loop(start <= end) {
+		display start
+		start = start + 1
+	}
+}
+display "Starting no"
+ask i
+display "Ending no"
+ask j
+printSequence(i, j)
+END PROG
