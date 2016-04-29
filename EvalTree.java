@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Stack;
 
+
 public class EvalTree extends HelloBaseVisitor<Integer>{			
 
 	int id = 0;
@@ -197,7 +198,17 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 			}
 			pw.println("STORE "+ctx.getChild(0).getText());
 		}else{
-			pw.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
+			
+			if(ctx.getChild(2).getChild(0).getChild(0).getText().contains(":")){
+				String a[] = ctx.getChild(0).getText().split(":");
+				pw.println("PUSH GLOB "+a[1]);
+			}else{
+				pw.println("PUSH "+ctx.getChild(2).getChild(0).getChild(0).getText());
+				
+			}
+			
+			
+			
 			if(ctx.getChild(0).getText().contains(":")){
 				String a[] = ctx.getChild(0).getText().split(":");
 				pw.println("STORE GLOB "+a[1]);
@@ -247,6 +258,10 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		
 		return super.visitStackReturnOp(ctx);
 	}
+	
+	
+
+	
 
 	@Override
 	public Integer visitParams(HelloParser.ParamsContext ctx) {
@@ -284,6 +299,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		}else if(ctx.getChild(1).getText().contains(":")){
 			String a[] = ctx.getChild(1).getText().split(":");
 			pw.println("PUSH GLOB "+a[1]);
+			pw.println("DISP");
 		}else{
 			pw.println("PUSH "+ctx.getChild(1).getText());
 			pw.println("DISP");
@@ -311,11 +327,7 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 		return super.visitFunction(ctx);
 	}
 
-	@Override
-	public Integer visitParamList(HelloParser.ParamListContext ctx) {
-		// TODO Auto-generated method stub
-		return super.visitParamList(ctx);
-	}
+	
 
 	@Override
 	public Integer visitStatement(HelloParser.StatementContext ctx) {
@@ -362,20 +374,39 @@ public class EvalTree extends HelloBaseVisitor<Integer>{
 	
 	@Override
 	public Integer visitFormalParameterCall(HelloParser.FormalParameterCallContext ctx) {
-		String params = "";
-		for(int i=0;i<ctx.getChildCount();i++){
-			params += ctx.getChild(i).getText() + " ";
-		}
-		
-		pw.println("CALL "+ctx.getParent().getParent().getParent().getChild(0).getText()+" "+params);
-		
-		if(ctx.getParent().getParent().getParent().getParent().getChild(0) != null){
-			pw.println("STORE "+ctx.getParent().getParent().getParent().getParent().getChild(0).getText());
-		}
 		
 		return super.visitFormalParameterCall(ctx);
 	}
+	
+	@Override
+	public Integer visitParamListCall(HelloParser.ParamListCallContext ctx) {
+		// TODO Auto-generated method stub
+			
+		if(ctx.getChildCount()>1){
+			String a[] = ctx.getText().split(",");
+			String x="";
+			for(int i=0;i<a.length;i++){
+				x += " "+ a[i];
+			}
+			pw.println("CALL "+ctx.getParent().getParent().getChild(0).getText()+x);
+			
+		}
+		
+		if(ctx.getParent().getParent().getParent().getText().contains("=")){
+			pw.println("STORE "+ctx.getParent().getParent().getParent().getChild(0).getText());
+		}
+		
+		return super.visitParamListCall(ctx);
+	}
 
+	@Override
+	public Integer visitParamList(HelloParser.ParamListContext ctx) {
+		// TODO Auto-generated method stub
+		
+		
+		return super.visitParamList(ctx);
+	}
+	
 	@Override
 	public Integer visitFormalParameter(HelloParser.FormalParameterContext ctx) {
 		// TODO Auto-generated method stub
